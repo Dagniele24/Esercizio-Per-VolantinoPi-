@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="it" >
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Login</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+    body {
+      margin: 0;
+      height: 100vh;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+
+    #bgCanvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+      background: transparent;
+    }
+
+    .login-card {
+      position: relative;
+      z-index: 1;
+      width: 380px;
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 20px;
+      box-shadow:
+        0 8px 32px 0 rgba(31, 38, 135, 0.37),
+        0 0 0 1px rgba(255, 255, 255, 0.18);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      padding: 3rem 2.5rem;
+      color: #fff;
+      text-align: center;
+      transition: box-shadow 0.3s ease;
+    }
+
+    .login-card:hover {
+      box-shadow:
+        0 12px 48px 0 rgba(31, 38, 135, 0.7),
+        0 0 0 1px rgba(255, 255, 255, 0.4);
+      cursor: default;
+    }
+
+    .login-card h3 {
+      font-weight: 600;
+      margin-bottom: 1.8rem;
+      letter-spacing: 1px;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+      user-select: none;
+    }
+
+    .form-control {
+      border-radius: 12px;
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      border: none;
+      background: rgba(255, 255, 255, 0.25);
+      color: #fff;
+      box-shadow: inset 2px 2px 8px rgba(255, 255, 255, 0.25);
+      transition: background-color 0.3s ease;
+    }
+
+    .form-control::placeholder {
+      color: #e0e0e0;
+      font-weight: 500;
+    }
+
+    .form-control:focus {
+      outline: none;
+      background: rgba(255, 255, 255, 0.5);
+      box-shadow: 0 0 8px 2px #5a7dfd;
+      color: #0d0d0d;
+      font-weight: 600;
+    }
+
+    .btn-primary {
+      background: linear-gradient(45deg, #667eea, #764ba2);
+      border: none;
+      border-radius: 12px;
+      padding: 0.75rem 1rem;
+      font-weight: 600;
+      font-size: 1.1rem;
+      transition: background 0.3s ease, transform 0.2s ease;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.6);
+    }
+
+    .btn-primary:hover, .btn-primary:focus {
+      background: linear-gradient(45deg, #5a7dfd, #5f4bb6);
+      transform: scale(1.05);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.85);
+    }
+
+    .alert {
+      margin-top: 1rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      user-select: none;
+    }
+
+    @media (max-width: 400px) {
+      .login-card {
+        width: 90vw;
+        padding: 2.5rem 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="bgCanvas"></canvas>
+
+  <div class="login-card shadow">
+    <h3>Benvenuto</h3>
+    <input type="text" id="nome" class="form-control mb-4" placeholder="Scrivi il tuo nome" autocomplete="off" />
+    <button id="accedi" class="btn btn-primary w-100">Accedi</button>
+    <div id="alert" class="alert text-danger visually-hidden"></div>
+  </div>
+
+  <script src="script.js"></script>
+  <script>
+    const input = document.getElementById("nome");
+    const button = document.getElementById("accedi");
+    const alertBox = document.getElementById("alert");
+
+    button.addEventListener("click", () => {
+      const nome = input.value.trim();
+      if (!nome) {
+        alertBox.textContent = "Inserisci il tuo nome";
+        alertBox.classList.remove("visually-hidden");
+        input.focus();
+        return;
+      }
+      alertBox.classList.add("visually-hidden");
+      localStorage.setItem("nomeUtente", nome);
+      window.location.href = "dashboard.html";
+    });
+
+    input.addEventListener("input", () => {
+      if (!alertBox.classList.contains("visually-hidden")) {
+        alertBox.classList.add("visually-hidden");
+      }
+    });
+
+    const canvas = document.getElementById('bgCanvas');
+    const ctx = canvas.getContext('2d');
+    let width, height;
+
+    function resize() {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width;
+      canvas.height = height;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    class Particle {
+      constructor() {
+        this.reset();
+      }
+      reset() {
+        this.x = Math.random() * width;
+        this.y = Math.random() * height;
+        this.size = 1 + Math.random() * 2;
+        this.speedX = (Math.random() - 0.5) * 0.15;
+        this.speedY = (Math.random() - 0.5) * 0.15;
+        this.alpha = 0.1 + Math.random() * 0.3;
+      }
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+
+        if (this.x < 0 || this.x > width) this.speedX = -this.speedX;
+        if (this.y < 0 || this.y > height) this.speedY = -this.speedY;
+      }
+      draw() {
+        ctx.beginPath();
+        ctx.fillStyle = `rgba(255, 255, 255, ${this.alpha})`;
+        ctx.shadowColor = `rgba(255, 255, 255, ${this.alpha})`;
+        ctx.shadowBlur = 4;
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    const particles = [];
+    const PARTICLE_COUNT = 120;
+
+    for(let i = 0; i < PARTICLE_COUNT; i++) {
+      particles.push(new Particle());
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, width, height);
+      particles.forEach(p => {
+        p.update();
+        p.draw();
+      });
+      requestAnimationFrame(animate);
+    }
+
+    animate();
+
+  </script>
+</body>
+</html>
